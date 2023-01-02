@@ -1,0 +1,249 @@
+---
+title: Analysis of Frequencies of Differences between Root and Tonic Notes in Popular
+  Songs
+author: "Joshua Engelkes"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  pdf_document:
+    citation_package: natbib
+    keep_tex: yes
+    fig_width: 6
+    fig_height: 4.5
+    latex_engine: pdflatex
+  word_document: default
+geometry: margin=1in
+fontfamily: mathpazo
+fontsize: 11pt
+documentclass: article
+bibliography: seminar.bib
+biblio-style: jss
+---
+
+- Key words: Popular, Harmonic, Frequencies
+
+
+# Introduction
+In the era of classic rock, disco, rock ‘n roll, and metal, chords define how the music progresses and are commonly the reason a song may be catchy and popular. Understanding the frequencies of chord attributes with respect to the root, the note that the chord is centered around, can be beneficial to the music industry when understanding why songs become popular. Music executives and music analysts put a lot of thought into chord frequency, and it is common to write songs based on how the chords of popular songs worked previously. Using the McGill Billboard Top 100 data set of popular songs from the 50s to the 90s, studying the frequency of chords can be used to create a popular song through imitating attributes of popular songs. Music is an art of habits and numbers, so repeating familiar ideas throughout popular songs within reason will cause the new songs to gain popularity. Through harmonic analysis of popular music, trends may appear to assist the creation of new popular music using ideas that past songs enveloped. Using trends from popular music can dictate the progression and development of new music. 
+
+This project will focus on analyzing the harmonic tendencies of these randomly selected songs. More specifically, testing for trends between chords in relation to the tonic note, while determining whether differences in bass notes and root notes affect these trends. These tests will conclude whether these harmonic tendencies appear more frequently in certain chords with relation to the tonic note. If these tendencies are found in popular music, popular music chords from the 50s to the 90s can exhibit evidence towards specific harmonic tendencies. 
+
+# Background
+
+## Similar Works
+
+Analyzing chord data has a different execution dependent on the type of conclusions to be made. Commonly, articles related to analyzing harmonic functions focus heavily on jazz, such as in @Absolu2010. This article notes several rock and jazz chord progressions from 20 composers and analyzes tunes from popular jazz composers to test for similarity. Chord simplification and representation is explored through N-grams (consecutive sets of 'n' chords) and distance functions. Extraction and interpretation of this article shows how analyzing harmonic progressions can reveal patterns dependent on factors such as composer and style of music. These similarities reveal insight on the inner workings of the creation of popular music.
+
+Pattern recognition is thoroughly examined throughout @Wu2018 as the article describes the process of creating an "ultimate dictionary" of musical ideas that can describe pieces and label them through pattern recognition. This is done by describing songs by their content, with a small section of content being considered a musical word. Musical words are repeated in different pieces and assist in finding common musical words in a specific genre. @Shan2002 also describes a process of extracting melodies and chords to create a 2-way classification with accuracy between 70-84%. 
+
+## Data Set Background
+
+The creation of the McGill Billboard Project is outlined in @Burgoyne2011, where they take experienced jazz musicians in addition to graduate and undergraduate music students to record time stamped transcription of the harmonies underlying popular music. The goal in constructing the data set was to provide a high-quality set of chords for audio recognition, as well as contributing to the analysis of popular music and computational musicology. The songs are randomly selected from the U.S. Billboard "Hot 100" chart from 1958 to 1991. This collection of music is a weekly compilation of the most popular singles in the United States, regardless of genre. Because of the inclusivity of all genres, the U.S. Billboard “Hot 100” chart was selected appropriately to guide broad musicological conclusions. The time period of songs included was based on maintaining similar standards for included songs. The first songs in the population of popular songs in the data set start in August 1958, the first date of the chart. The last songs considered hit the charts in December 1991, when the criteria for generating the charts were altered.
+
+Transcribing the large data set involved over two dozen people. Eventually, the data set acquired audio for 68% of the slots (1365 out of 2000 slots). Especially popular singles are potentially included into the data set more than once, since the sample was taken over entries in the Billboard “Hot 100” opposed to individual singles that are contained in the chart. The resulting data set contained 414,059 labeled beats and chords associated with those beats of the songs. 
+
+## Musical Background
+
+The musical fundamentals of this data set are reliant on the Standard Western 12-tone scale, which is the base of western music theory. The Standard 12-tone scale contains notes: A, Bb, B, C, C#, D, Eb, F, F#, G, and Ab. There are alternative names for some of the notes, which could alter dependent on the key of the song. The key of a song is the note or chord that the music is centered around. It is the most prevalent root and bass note and where the music transitions to release tension in a song. The note “Ab”, for example, can either be referred to as “Ab” or “G#”. These substitutions in names will be important in studying the introductory graphs from individual variables that do not show the relation to the tonic key. 
+
+Three terms will be referred to describing notes for this data set: tonic note, root note, bass note. Tonic note refers to the key that the song is in. The most important part of this analysis is referring the other two notes with respect to the tonic note of the song. The root note is the note that the chord at a particular instance revolves around, and the bass note refers to the note that the bass voice is playing. A bass voice could be an electric bass guitar, acoustic double bass, or any voice in the music that is functioning as the lowest voice. Usage of specific chords is integral to the creation of music because of their relevance to the tonic key. Understanding placement in respect to the tonic key will require a basic understanding of intervals. The best way to imagine this concept is through looking at a keyboard.
+
+![Keyboard](ImagesForSeniorSeminar/IntervalKeyboard.png)
+
+For this example of intervals, the tonic key of C will be used as an example. When playing in the key of C, the tonic note will always be referred to as C by the data set. The root note and bass note variables will change. The difference in notes between the tonic and the root will specify how the root can be referred to. One tone above the tonic is called a minor 2nd or flat 2nd. In the key of C, Db or C# would be the flat 2nd. Two tones above the tonic is called a major 2nd. For the remainder of these intervals, view Table \ref{tab:simptab1}. Using these intervals, the roots can be assigned names with respect to the interval placement compared to the tonic note. The tonic note is referred to as 1, all major and perfect intervals are called by their numbers (ie. 2, 3, 4, 5, etc.), and all minor intervals are referred to as flat chords (ie. b2, b3, b7, etc.). Flat chords are not prevalent in the music studied in this data set. In the tonic key of C, a Db root is a b2 chord, a D root is a 2 chord, an Eb root is a b3 chord, an E root is a 3 chord, a F root is a 4 chord, a F# or Gb root is a b5 chord, a G root is a 5 chord, a Ab root is a b6 chord, a A root is a 6 chord, a Bb root is a b7 chord, and a B root is a 7 chord. These terms will be used for the data analysis.
+
+```{r table, echo=FALSE}
+IntervalTable <- matrix(c(0, 'Perfect Unison', 1, 'Minor 2nd', 2, 'Major 2nd', 3, 'Minor 3rd', 4, 'Major 3rd', 5, 'Perfect 4', 6, 'Tritone', 7, 'Perfect 5th', 8, 'Minor 6th', 9, 'Major 6th', 10, 'Minor 7th',11, 'Major 7th', 12, 'Perfect Octave'), ncol=2, byrow=TRUE)
+colnames(IntervalTable) <- c('# of Steps','Interval')
+#IntervalTable <- as.table(IntervalTable)
+knitr::kable(IntervalTable[, 1:2], "pipe", caption="\\label{tab:simptab1}Interval Name per Number of Half Steps")
+```
+
+# Data Cleaning
+```{r include=FALSE}
+## Bring in Data
+
+library(tidyverse)
+library(dplyr)
+
+## Retrieve chord data as a data frame
+all_chords_fixed <- read_csv("all_chords_fixed.csv")
+```
+To use this data in the context of analyzing the number of beats that have a different bass note than the tonic note, it has to be cleaned and wrangled. There is currently no variable signifying when this occurs, nor the interval position of the root note to the tonic note. Therefore, these variables must be created. 
+Every initial silence of a song is labeled as beat 0. This is the only time  that beat 0 is used in the beat.of.bar variable. For every beat 0, the  variables related to chord choice is all NA, since it is during the silence of the song. Therefore, omitting every occurrence of beat.of.bar = 0 will not  altar the aspects of the data analyzed in this paper. Omitting whenever the tonic or bass is NA is necessary as comparison between the  tonic, root chord, and bass note requires the tonic and bass notes. The absence of these entries indicates having no harmonic devices or bass voices used in that particular instance of the song. Having no chord or bass voice is another form of choice that a song could implement to become popular, but it is not the aspect of the music being analyzed. 
+Since every note is given a numerical variable increasing as half-steps move upward starting at A being 0, the interval can be calculated from the tonic note to the root note by subtracting the root note from the tonic note modulus 12. Then the number of half steps between the tonic and the root can be renamed via Table \ref{tab:simptab1}. After similarly creating a bass interval from tonic variable, a Boolean variable is created that is true when the tonic note and the bass note are the same, and false otherwise.
+```{r include=FALSE}
+## Data Cleaning
+
+# Every initial silence of a song is labeled as beat 0. This is the only time 
+# that beat 0 is used in the beat.of.bar variable. For every beat 0, the 
+# variables related to chord choice is all NA, since it is during the silence of
+# the song. Therefore, omitting every occurrence of beat.of.bar = 0 will not 
+# altar the aspects of the data analyzed in this paper.
+# Omitting whenever the tonic is NA is not necessary as comparison between the 
+# tonic and chord requires the tonic. This indicates having no harmonic devices
+# used in that particular instance of the song. Having no chord is another form
+# of choice that a song could used to become popular, so it would not be wise to
+# negate it
+all_chords_fixed <- all_chords_fixed %>% 
+  filter(beat.of.bar > 0) %>%
+  filter(!is.na(root.name)) %>%
+  filter(!is.na(bass.name))
+
+# Since the data set also provides numerical symbol for each note, with A being 
+# 0 and increasing by one with each half step increase, we can calculate the 
+# interval difference between the tonic note and the root chord or bass note.
+all_chords_fixed$root.chord <- 
+  (all_chords_fixed$root.pc - all_chords_fixed$tonic.pc + 12) %% 12
+
+# From there, we can assign the root chord in relation to the tonic note by
+# assigning the half step increments to their respective values on the interval
+# table.
+all_chords_fixed <- all_chords_fixed %>% 
+  mutate(root.chord = recode(root.chord,
+                             "0" = "1",
+                             "1" = "b2", 
+                             "2" = "2", 
+                             "3" = "b3",
+                             "4" = "3",
+                             "5" = "4",
+                             "6" = "b5",
+                             "7" = "5",
+                             "8" = "b6",
+                             "9" = "6",
+                             "10" = "b7",
+                             "11" = "7"))
+
+all_chords_fixed$bass.note <- (all_chords_fixed$bass.pc - all_chords_fixed$tonic.pc + 12) %% 12
+all_chords_fixed <- all_chords_fixed %>% 
+  mutate(bass.note = recode(bass.note,
+                             "0" = '1',
+                             "1" = 'b2', 
+                             "2" = '2', 
+                             "3" = 'b3',
+                             "4" = '3',
+                             "5" = '4',
+                             "6" = 'b5',
+                             "7" = '5',
+                             "8" = 'b6',
+                             "9" = '6',
+                             "10" = 'b7',
+                             "11" = '7'))
+
+## Create diff.bass, which is a bool for when the bass note is different from the root chord
+all_chords_fixed <- all_chords_fixed %>%
+  mutate(diff.bass = case_when(bass.note == root.chord ~ TRUE,
+                           bass.note != root.chord ~ FALSE))
+
+## Here is some sample output:
+#all_chords_fixed %>% 
+#  select(tonic.name, root.name, root.chord, bass.name, bass.note, diff.bass)
+```
+
+# Introductory Graphics
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+TableTime<-(all_chords_fixed %>% select(root.chord, diff.bass)) %>% 
+              filter(!is.na(root.chord)) %>%
+              add_count(root.chord) %>%
+              filter(diff.bass == FALSE) %>%
+              count(root.chord, n) %>%
+              mutate(Percent = (nn / n) * 100) %>%
+              rename("Total.Chords" = "n", "Root.Chord" = "root.chord", "Different.Bass" = "nn")
+                
+knitr::kable(TableTime, caption="\\label{tab:simptab2}Number of Chords with Different Root and Bass Notes")
+```
+
+Table \ref{tab:simptab2} shows the number of chords with different root and bass notes by interval from the tonic note to the root. There does not appear to be a clear indication of any interval relations that show evidence for dependence. The frequencies seem to vary uniformly between about 4% and 14%, with the major 7 having a frequency of 18%. Since the number of chords with a major seventh root is the smallest, there is a higher variation within that category of chord. The most frequent root, the 1 or perfect unison root, has a fairly low percent when compared to the other most frequent root, clocking in at 4.67% in contrast to 4, with a different bass frequency of 11.36%. This could indicate a possible dependence, since the number of chords in these categories is so large.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+all_chords_fixed %>% 
+              select(root.chord, diff.bass) %>% 
+              filter(!is.na(root.chord)) %>%
+              add_count(root.chord) %>%
+              filter(diff.bass == FALSE) %>%
+              count(root.chord, n) %>%
+              mutate(Percent = (nn / n) * 100) %>%
+              rename("Total.Chords" = "n", "Root.Chord" = "root.chord", "Different.Bass" = "nn") %>%
+ggplot(data=.) +
+    geom_bar(mapping=aes(x = Percent,y=Root.Chord),stat="Identity") +
+   labs(subtitle = " ",
+        x="Percent") + ylab("Interval from Tonic")
+```
+
+![Number of Chords with Different Root and Bass Notes](ImagesForSeniorSeminar/Figure2.png)
+
+Figure 2 shows that there is no particular break or pattern with the different bass and root notes in relation to the interval from the tonic to the root. The major 7 appears uncharacteristically high, but that could be random error due to the low appearance of major 7 roots. 
+
+# Statistical Method
+
+The statistical method used will assess whether there is a difference in the proportions of attributes of chords with certain distances from the tonic note. The method is a Pearson Chi-Squared Test, as shown in @Greenwood. The Pearson Chi-Squared test assesses whether a categorical predictor variable has an effect on a categorical response variable.
+
+- Null Hypothesis: the variables in the columns and rows of the table of data are independent of one another
+
+- Alternative Hypothesis: the variables in the columns and rows of the table of data are dependent
+
+The test statistic for a Pearson Test is $\chi^{2}$, calculated:
+\begin{displaymath}
+\chi^{2}=\displaystyle\sum^{k}_{i=1}((O_{i}-np_{i}^{(0)})^2)/E_{i}
+\end{displaymath}
+in which $k$ is the number of cells in the table, $O_{i}$ is the frequency of the event or class, $n$ is the number of trials, and $p_{i}$ is the expected vector of frequencies. The chi-squared statistic is calculated with $df=(row.count - 1)(coloum.count - 1)$. The conclusion of the Pearson Test will assess whether there is a significant difference in the proportions, signifying evidence that the variables are dependent.
+
+
+# Results
+```{r propbib, tidy=FALSE, include=FALSE}
+
+basstab=as.table(matrix(c(5059, 103395, 1818, 12296, 410, 5702, 5462, 42598, 2835, 38570, 633, 15134, 191, 870, 100, 1696, 589, 4078, 184, 1082, 673, 6586, 1537, 10359),
+byrow=T, nrow=12, ncol=2, 
+dimnames=list(Root.Note=c("1","2","3", "4", "5", "6", "7", "b2", "b3", "b5", "b6", "b7"), 
+              DifferenceInBass=c("Yes","No"))))
+
+basstab
+```
+```{r include=FALSE}
+basstab
+```
+
+```{r include=FALSE}
+chisq.test(basstab)
+chisq.test(basstab)$stdres
+chisq.test(basstab)$residuals
+#
+prop.table(basstab,1)
+prop.test(basstab[,1],margin.table(basstab,1))
+prop.trend.test(basstab[,1],margin.table(basstab,1))
+```
+
+Test For Trend in Proportions:
+
+* Hypotheses: 
+  * $NH$: $p_{1}=p_{2}= \ldots = p_{12}$
+  * $AH:$ proportions are different than each other
+
+* Test Statistic Value: 1040.5
+
+* P-value: 2.2e-16
+
+* Conclusion: The p-value is very small (<0.01), so the data are not consistent with the null hypothesis. There is sufficient reason to reject the null hypothesis that the frequency of bass notes that differ from the root note is the same for all root intervals from the tonic note. There is evidence to support the alternative hypothesis. Therefore, there is reason that there is a difference in proportions in the frequency of bass notes that differ from different root intervals from the tonic note.
+```{r echo=FALSE, include=FALSE}
+mosaicplot(basstab, shade=TRUE, xlab = "Root Note", ylab = "Frequencies", caption="\\label{gif:simpfig1}Number of Chords with Different Root and Bass Notes")
+```
+
+![Difference in Bass and Tonic Notes](ImagesForSeniorSeminar/Figure3.png)
+
+Figure 3 shows a mosaic plot of indicating the strength of the relationship between the difference of bass and root notes and the interval between the tonic and root note. The shaded regions show a stronger association. The 2nd, 4th and flat 7th have a strong tendency to have a difference between the root and bass note, whereas the 1 and 6 have a tendency to have less differences between the root and bass note. 
+
+# Discussion
+
+There is evidence to show that there is a dependence in frequencies of bass note that differ from root notes by the distance between the tonic and root notes. This is with each chord being weighted by the length of the chord since the McGill BillBoard Data set is transcribed by beat. The conclusion can only be applied to popular songs fitting the McGill BillBoard "Hot 100" list criteria from 1958 to 1991. 
+
+Therefore, in a time-stamped analysis of popular songs from the McGill Billboard Data set from 1958 to 1991, there is evidence that there is a dependence between the frequencies of bass and tonic notes that differ and the distance of the tonic note and the root note of the chord. 
+
+Packages: [@R-tidyverse,@R-knitr,@R-dplyr].
+
+<!--
+# References
+\setlength{\parindent}{-0.2in}
+\setlength{\leftskip}{0.2in}
+\setlength{\parskip}{8pt}
+\vspace*{-0.2in}
+\noindent
+-->
